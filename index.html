@@ -86,6 +86,9 @@ textarea{resize:vertical;min-height:90px}
 .public-profile .preview-name{font-size:25px}
 .public-profile .preview-bio{margin-top:20px}
 .empty{color:var(--muted);padding:14px 0}
+#soundSettings{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 0}
+#soundToggle{background:#41434a;font-size:12px;padding:7px 9px}
+#notificationStatus{font-size:11px;color:var(--muted)}
 @media(max-width:650px){
 #app{grid-template-columns:78px minmax(0,1fr)}
 .sidebar{padding:9px 5px}
@@ -160,6 +163,10 @@ textarea{resize:vertical;min-height:90px}
 <div class="userbox">
 <div class="userline"><div class="avatar" id="avatar">?</div>
 <div><strong id="usernameDisplay">User</strong><div id="roleLabel" class="muted"></div></div></div>
+<div id="soundSettings">
+<button id="soundToggle" type="button">🔔 Sounds: On</button>
+<span id="notificationStatus">Click once to enable audio</span>
+</div>
 <button id="logout" type="button">Log out</button>
 </div>
 </aside>
@@ -179,16 +186,70 @@ const SUPABASE_URL="https://bqvpsbcvdivuajehocag.supabase.co";
 const SUPABASE_KEY="sb_publishable_qHH0hRblnYrf1Fv_Urv8qg_rvtX3xGU";
 const $=id=>document.getElementById(id);
 let db=null,user=null,profile=null,channel="general",subscription=null,dmSubscription=null;
-let signup=false,busy=false,view="channel",dmFriend=null,friends=[],owner=false;
+let notificationSubscriptions=[],signup=false,busy=false,view="channel",dmFriend=null,friends=[],owner=false;
 const profileCache=new Map();
+let soundEnabled=localStorage.getItem("schoolcord_sounds")!=="off";
+let audioContext=null,lastSoundAt=0;
+let knownRequestIds=new Set(),knownFriendships=new Set(),seenDirectIds=new Set();
+const recentEventIds=new Set();
+
+function unlockAudio(){
+try{
+const Ctx=window.AudioContext||window.webkitAudioContext;
+if(!Ctx)return;
+if(!audioContext)audioContext=new Ctx();
+if(audioContext.state==="suspended")audioContext.resume();
+$("notificationStatus").textContent="Audio ready";
+}catch(e){console.warn("Audio unavailable:",e)}
+}
+function playSound(type="message"){
+if(!soundEnabled)return;
+const now=Date.now();
+if(now-lastSoundAt<220)return;
+lastSoundAt=now;
+try{
+unlockAudio();
+if(!audioContext||audioContext.state!=="running")return;
+const tones={
+message:[660,.12],
+dm:[820,.15],
+friend:[900,.17],
+accepted:[1040,.2],
+general:[740,.12]
+};
+const [frequency,duration]=tones[type]||tones.general;
+const osc=audioContext.createOscillator();
+const gain=audioContext.createGain();
+osc.type="sine";
+osc.frequency.setValueAtTime(frequency,audioContext.currentTime);
+gain.gain.setValueAtTime(.0001,audioContext.currentTime);
+gain.gain.exponentialRampToValueAtTime(.11,audioContext.currentTime+.015);
+gain.gain.exponentialRampToValueAtTime(.0001,audioContext.currentTime+duration);
+osc.connect(gain);gain.connect(audioContext.destination);
+osc.start();osc.stop(audioContext.currentTime+duration);
+}catch(e){console.warn("Notification sound failed:",e)}
+}
+function soundEvent(id,type){
+if(!id||recentEventIds.has(id))return;
+recentEventIds.add(id);
+if(recentEventIds.size>300)recentEventIds.delete(recentEventIds.values().next().value);
+playSound(type);
+}
+document.addEventListener("pointerdown",unlockAudio);
+document.addEventListener("keydown",unlockAudio);
+$("soundToggle").onclick=()=>{
+soundEnabled=!soundEnabled;
+localStorage.setItem("schoolcord_sounds",soundEnabled?"on":"off");
+$("soundToggle").textContent=soundEnabled?"🔔 Sounds: On":"🔕 Sounds: Off";
+if(soundEnabled){unlockAudio();playSound("general")}
+};
+$("soundToggle").textContent=soundEnabled?"🔔 Sounds: On":"🔕 Sounds: Off";
 
 function status(msg,ok=false){$("status").textContent=msg;$("status").style.color=ok?"#a5f3c1":"#ffb4b4"}
 function notice(msg){$("notice").textContent=msg}
 function showApp(){$("auth").classList.add("hidden");$("app").classList.remove("hidden")}
 function showAuth(){$("app").classList.add("hidden");$("auth").classList.remove("hidden")}
-function safeImageUrl(value){
-try{const u=new URL(value);return ["https:","http:"].includes(u.protocol)?u.href:""}catch{return ""}
-}
+function safeImageUrl(value){try{const u=new URL(value);return ["https:","http:"].includes(u.protocol)?u.href:""}catch{return ""}}
 function setAvatar(el,p){
 el.replaceChildren();
 const url=safeImageUrl(p?.avatar_url);
@@ -265,11 +326,19 @@ async function clearSubscriptions(){
 if(subscription){await db.removeChannel(subscription);subscription=null}
 if(dmSubscription){await db.removeChannel(dmSubscription);dmSubscription=null}
 }
+async function clearNotificationSubscriptions(){
+for(const s of notificationSubscriptions)try{await db.removeChannel(s)}catch{}
+notificationSubscriptions=[];
+}
 function subscribeChannel(){
 if(subscription)db.removeChannel(subscription);
 $("connection").textContent="Connecting…";
 subscription=db.channel("schoolcord-channel-"+channel)
-.on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:"channel_id=eq."+channel},p=>{if(view==="channel")renderMessage(p.new)})
+.on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:"channel_id=eq."+channel},p=>{
+const m=p.new;
+if(m.user_id!==user?.id)soundEvent("public:"+m.id,"message");
+if(view==="channel"&&channel===m.channel_id)renderMessage(m);
+})
 .subscribe(s=>{$("connection").textContent=s==="SUBSCRIBED"?"Live":s==="CHANNEL_ERROR"?"Connection error":"Connecting…"});
 }
 async function loadChannelMessages(){
@@ -317,11 +386,8 @@ const time=element("time");
 const date=new Date(m.created_at);time.textContent=Number.isNaN(date.getTime())?"":date.toLocaleString();
 const content=element("div","",m.content);
 head.append(name,time);body.append(head,content);item.append(av,body);$("messages").append(item);
-try{
-const p=await getProfile(m.user_id);
-if(p){name.textContent=p.display_name||p.username;setAvatar(av,p)}
-else setAvatar(av,{username:m.username});
-}catch{setAvatar(av,{username:m.username})}
+try{const p=await getProfile(m.user_id);if(p){name.textContent=p.display_name||p.username;setAvatar(av,p)}else setAvatar(av,{username:m.username})}
+catch{setAvatar(av,{username:m.username})}
 if(!$("messages").classList.contains("hidden"))$("messages").scrollTop=$("messages").scrollHeight;
 }
 async function loadFriends(){
@@ -337,9 +403,7 @@ friends.forEach(p=>profileCache.set(p.id,p));renderDMList();
 function renderDMList(){
 const nav=$("dmList");nav.replaceChildren();
 if(!friends.length){nav.append(element("small","muted","No DMs yet"));return}
-friends.forEach(f=>{
-const b=element("button","navbtn","@ "+(f.display_name||f.username));b.onclick=()=>openDM(f,b);nav.append(b);
-});
+friends.forEach(f=>{const b=element("button","navbtn","@ "+(f.display_name||f.username));b.onclick=()=>openDM(f,b);nav.append(b)});
 }
 function personRow(p,description,buttons=[]){
 const row=element("div","person"),av=element("div","avatar");
@@ -467,18 +531,11 @@ $("editAvatar").value=profile.avatar_url||"";
 $("editBanner").value=profile.banner_url||"";
 $("editBio").value=profile.bio||"";
 $("editColor").value=/^#[0-9a-f]{6}$/i.test(profile.accent_color||"")?profile.accent_color:"#5865f2";
-["editDisplayName","editAvatar","editBanner","editBio","editColor"].forEach(id=>$(id).addEventListener("input",()=>{
-$("colorValue").textContent=$("editColor").value;updatePreview();
-}));
+["editDisplayName","editAvatar","editBanner","editBio","editColor"].forEach(id=>$(id).addEventListener("input",()=>{$("colorValue").textContent=$("editColor").value;updatePreview()}));
 updatePreview();
-$("resetProfile").onclick=()=>{ $("editDisplayName").value=profile.display_name||profile.username;$("editAvatar").value=profile.avatar_url||"";$("editBanner").value=profile.banner_url||"";$("editBio").value=profile.bio||"";$("editColor").value=profile.accent_color||"#5865f2";updatePreview();$("profileStatus").textContent="Preview reset to saved values.";};
+$("resetProfile").onclick=()=>{$("editDisplayName").value=profile.display_name||profile.username;$("editAvatar").value=profile.avatar_url||"";$("editBanner").value=profile.banner_url||"";$("editBio").value=profile.bio||"";$("editColor").value=profile.accent_color||"#5865f2";updatePreview();$("profileStatus").textContent="Preview reset to saved values."};
 $("saveProfile").onclick=async()=>{
-const display_name=$("editDisplayName").value.trim();
-const avatar_url=$("editAvatar").value.trim();
-const banner_url=$("editBanner").value.trim();
-const bio=$("editBio").value.trim();
-const accent_color=$("editColor").value;
-const msg=$("profileStatus");
+const display_name=$("editDisplayName").value.trim(),avatar_url=$("editAvatar").value.trim(),banner_url=$("editBanner").value.trim(),bio=$("editBio").value.trim(),accent_color=$("editColor").value,msg=$("profileStatus");
 if(display_name.length>32){msg.textContent="Display name must be 32 characters or fewer.";return}
 if(!display_name){msg.textContent="Display name cannot be empty.";return}
 if(bio.length>300){msg.textContent="Bio must be 300 characters or fewer.";return}
@@ -486,11 +543,9 @@ if(avatar_url&&!safeImageUrl(avatar_url)){msg.textContent="Profile picture must 
 if(banner_url&&!safeImageUrl(banner_url)){msg.textContent="Banner must be a valid HTTP or HTTPS URL.";return}
 const button=$("saveProfile");button.disabled=true;msg.textContent="Saving…";
 try{
-const changes={display_name,avatar_url:avatar_url||null,banner_url:banner_url||null,bio,accent_color};
-const {data,error}=await db.from("profiles").update(changes).eq("id",user.id).select("id,username,display_name,avatar_url,banner_url,bio,accent_color").single();
+const {data,error}=await db.from("profiles").update({display_name,avatar_url:avatar_url||null,banner_url:banner_url||null,bio,accent_color}).eq("id",user.id).select("id,username,display_name,avatar_url,banner_url,bio,accent_color").single();
 if(error)throw error;
-profile={...data};profileCache.set(profile.id,profile);setCurrentAppearance();
-msg.textContent="Profile saved successfully!";
+profile={...data};profileCache.set(profile.id,profile);setCurrentAppearance();msg.textContent="Profile saved successfully!";
 }catch(e){msg.textContent="Could not save profile: "+e.message}
 finally{button.disabled=false}
 };
@@ -500,16 +555,12 @@ try{
 const p=await getProfile(id);
 if(!p){notice("That profile could not be found.");return}
 showPanel("Profile");
-const root=$("socialPanel");
-const card=element("div","public-profile");
-const banner=element("div","profile-banner");
+const root=$("socialPanel"),card=element("div","public-profile"),banner=element("div","profile-banner");
 banner.style.backgroundImage=imageBackground(p.banner_url)||"linear-gradient(135deg,#5865f2,#282b54)";
-const info=element("div","public-profile-info");
-const av=element("div","avatar preview-avatar");setAvatar(av,p);
-const name=element("div","preview-name",p.display_name||p.username);
-name.style.color=p.accent_color||"#5865f2";
-const uname=element("div","preview-username","@"+p.username);
-const bio=element("div","preview-bio",p.bio||"No bio yet.");
+const info=element("div","public-profile-info"),av=element("div","avatar preview-avatar");
+setAvatar(av,p);
+const name=element("div","preview-name",p.display_name||p.username);name.style.color=p.accent_color||"#5865f2";
+const uname=element("div","preview-username","@"+p.username),bio=element("div","preview-bio",p.bio||"No bio yet.");
 info.append(av,name,uname,bio);card.append(banner,info);root.append(card);
 if(id!==user.id){
 const isFriend=friends.some(f=>f.id===id);
@@ -523,12 +574,9 @@ const existing=(reqs||[]).find(r=>(r.sender_id===user.id&&r.receiver_id===id)||(
 if(existing){notice(existing.status==="accepted"?"You are already friends.":existing.status==="pending"?"A friend request already exists.":"A previous request exists. Ask them to send you a request.");return}
 const {error:er}=await db.from("friend_requests").insert({sender_id:user.id,receiver_id:id});
 notice(er?"Could not send request: "+er.message:"Friend request sent!");
-};
-root.append(b);
+};root.append(b);
 }
-}else{
-const b=element("button","","Edit my profile");b.onclick=()=>showProfileEditor(document.querySelector('[data-view="profile"]'));root.append(b);
-}
+}else{const b=element("button","","Edit my profile");b.onclick=()=>showProfileEditor(document.querySelector('[data-view="profile"]'));root.append(b)}
 }catch(e){showPanel("Profile");$("socialPanel").textContent="Could not load profile: "+e.message}
 }
 async function loadDMs(){
@@ -539,6 +587,7 @@ if(error){showWelcome("Could not load DMs",error.message);notice(error.message);
 $("messages").innerHTML="";
 if(!data.length)showWelcome("Start your conversation","Send a private message to @"+(f.display_name||f.username)+".");
 for(const m of data){
+seenDirectIds.add(m.id);
 const sender=m.sender_id===user.id?profile:await getProfile(m.sender_id);
 await renderMessage({...m,user_id:m.sender_id,username:sender?.username||"User"});
 }
@@ -546,13 +595,76 @@ await renderMessage({...m,user_id:m.sender_id,username:sender?.username||"User"}
 function subscribeDMs(){
 if(dmSubscription)db.removeChannel(dmSubscription);
 dmSubscription=db.channel("schoolcord-dms-"+user.id)
-.on("postgres_changes",{event:"INSERT",schema:"public",table:"direct_messages"},async p=>{
+.on("postgres_changes",{event:"INSERT",schema:"public",table:"direct_messages",filter:"recipient_id=eq."+user.id},async p=>{
 const m=p.new;
-if(view!=="dm"||!dmFriend)return;
-if(!((m.sender_id===user.id&&m.recipient_id===dmFriend.id)||(m.sender_id===dmFriend.id&&m.recipient_id===user.id)))return;
-const sender=m.sender_id===user.id?profile:await getProfile(m.sender_id);
+if(m.sender_id===user.id)return;
+soundEvent("dm:"+m.id,"dm");
+seenDirectIds.add(m.id);
+if(view!=="dm"||!dmFriend||m.sender_id!==dmFriend.id)return;
+const sender=await getProfile(m.sender_id);
 await renderMessage({...m,user_id:m.sender_id,username:sender?.username||"User"});
 }).subscribe(s=>{$("connection").textContent=s==="SUBSCRIBED"?"Live":s==="CHANNEL_ERROR"?"Connection error":"Connecting…"});
+}
+
+async function subscribeNotifications(){
+await clearNotificationSubscriptions();
+knownRequestIds=new Set();
+knownFriendships=new Set();
+try{
+const {data:reqs,error}=await db.from("friend_requests").select("id").eq("receiver_id",user.id).eq("status","pending");
+if(!error)(reqs||[]).forEach(r=>knownRequestIds.add(r.id));
+}catch(e){console.warn("Could not initialize friend request tracking:",e.message)}
+try{
+const {data:fs,error}=await db.from("friendships").select("friend_id").eq("user_id",user.id);
+if(!error)(fs||[]).forEach(f=>knownFriendships.add(f.friend_id));
+}catch(e){console.warn("Could not initialize friendship tracking:",e.message)}
+const requestsSub=db.channel("schoolcord-notify-requests-"+user.id)
+.on("postgres_changes",{event:"INSERT",schema:"public",table:"friend_requests",filter:"receiver_id=eq."+user.id},payload=>{
+const r=payload.new;
+if(r.sender_id===user.id)return;
+if(r.id)knownRequestIds.add(r.id);
+soundEvent("request:"+r.id,"friend");
+$("requestCount").textContent="(new)";
+if(view==="Friend requests")showRequests(document.querySelector('[data-view="requests"]'));
+})
+.on("postgres_changes",{event:"UPDATE",schema:"public",table:"friend_requests",filter:"receiver_id=eq."+user.id},payload=>{
+const r=payload.new,old=payload.old;
+if(r.status==="accepted"&&old.status!=="accepted")soundEvent("request-accepted:"+r.id,"accepted");
+if(r.status==="pending"&&old.status!=="pending")soundEvent("request-pending:"+r.id,"friend");
+if(view==="Friend requests")showRequests(document.querySelector('[data-view="requests"]'));
+}).subscribe(s=>console.log("Friend request notifications:",s));
+notificationSubscriptions.push(requestsSub);
+
+const incomingDMSub=db.channel("schoolcord-notify-dms-"+user.id)
+.on("postgres_changes",{event:"INSERT",schema:"public",table:"direct_messages",filter:"recipient_id=eq."+user.id},payload=>{
+const m=payload.new;
+if(m.sender_id===user.id)return;
+soundEvent("dm:"+m.id,"dm");
+})
+.subscribe(s=>console.log("DM notifications:",s));
+notificationSubscriptions.push(incomingDMSub);
+
+const publicMessagesSub=db.channel("schoolcord-notify-public-"+user.id)
+.on("postgres_changes",{event:"INSERT",schema:"public",table:"messages"},payload=>{
+const m=payload.new;
+if(m.user_id===user.id)return;
+soundEvent("public:"+m.id,"message");
+if(view==="channel"&&m.channel_id===channel)renderMessage(m);
+})
+.subscribe(s=>console.log("Public message notifications:",s));
+notificationSubscriptions.push(publicMessagesSub);
+
+const friendshipSub=db.channel("schoolcord-notify-friendships-"+user.id)
+.on("postgres_changes",{event:"INSERT",schema:"public",table:"friendships",filter:"user_id=eq."+user.id},payload=>{
+const f=payload.new;
+if(!knownFriendships.has(f.friend_id)){
+knownFriendships.add(f.friend_id);
+soundEvent("friendship:"+f.friend_id,"accepted");
+loadFriends().catch(e=>console.warn(e));
+}
+})
+.subscribe(s=>console.log("Friendship notifications:",s));
+notificationSubscriptions.push(friendshipSub);
 }
 
 $("authForm").addEventListener("submit",async e=>{
@@ -577,8 +689,11 @@ finally{busy=false;$("authSubmit").disabled=false}
 async function enterApp(u){
 user=u;profile=await ensureProfile(u);
 setCurrentAppearance();
-await checkOwner();await loadFriends();
-showApp();await openChannel("general");
+await checkOwner();
+await loadFriends();
+showApp();
+await subscribeNotifications();
+await openChannel("general");
 }
 $("messageForm").addEventListener("submit",async e=>{
 e.preventDefault();if(!user||!profile)return;
@@ -603,6 +718,7 @@ document.querySelector('[data-view="requests"]').onclick=e=>showRequests(e.curre
 document.querySelector('[data-view="add"]').onclick=e=>showAddFriends(e.currentTarget);
 $("logout").onclick=async()=>{
 await clearSubscriptions();
+await clearNotificationSubscriptions();
 const {error}=await db.auth.signOut();
 if(error){notice(error.message);return}
 user=null;profile=null;friends=[];owner=false;profileCache.clear();showAuth();
