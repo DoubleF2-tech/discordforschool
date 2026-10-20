@@ -11,10 +11,11 @@
 :root{color-scheme:dark;--bg:#1e1f22;--panel:#2b2d31;--side:#232428;--accent:#5865f2;--text:#f2f3f5;--muted:#b5bac1}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font:15px Arial,sans-serif}
-button,input{font:inherit}
+button,input,textarea{font:inherit}
 button{cursor:pointer;border:0;border-radius:5px;padding:10px 13px;background:var(--accent);color:white;font-weight:bold}
 button:disabled{opacity:.5;cursor:not-allowed}
-input{width:100%;padding:11px;border-radius:5px;border:1px solid #41434a;background:#1e1f22;color:white}
+input,textarea{width:100%;padding:11px;border-radius:5px;border:1px solid #41434a;background:#1e1f22;color:white}
+textarea{resize:vertical;min-height:90px}
 .hidden{display:none!important}
 .muted,small{color:var(--muted)}
 #auth{min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(ellipse at top,#343b75,#1e1f22 65%)}
@@ -22,7 +23,7 @@ input{width:100%;padding:11px;border-radius:5px;border:1px solid #41434a;backgro
 .logo{font-size:28px;font-weight:800;letter-spacing:-1px}
 .logo span,.brand span{color:#8290ff}
 .stack{display:grid;gap:14px;margin-top:22px}
-.stack label{display:block;margin-bottom:6px}
+.stack label,.field label{display:block;margin-bottom:6px}
 #status{min-height:20px;color:#ffb4b4;overflow-wrap:anywhere;font-size:13px}
 .switch{text-align:center;margin-top:18px;color:var(--muted)}
 .switch button{background:none;color:#aab4ff;padding:4px}
@@ -35,7 +36,8 @@ input{width:100%;padding:11px;border-radius:5px;border:1px solid #41434a;backgro
 .navbtn:hover,.navbtn.active{background:#393b43;color:white}
 .userbox{margin-top:auto;padding:12px 8px;background:#191a1d;border-radius:7px;overflow-wrap:anywhere}
 .userline{display:flex;gap:8px;align-items:center}
-.avatar{width:35px;height:35px;flex-shrink:0;border-radius:50%;background:#5865f2;display:grid;place-items:center;font-weight:bold}
+.avatar{width:38px;height:38px;flex-shrink:0;border-radius:50%;background:var(--accent);display:grid;place-items:center;font-weight:bold;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
 #logout{background:#393b43;margin-top:12px;width:100%}
 .chat{display:flex;flex-direction:column;min-width:0;min-height:0}
 .topbar{min-height:61px;flex-shrink:0;border-bottom:1px solid #191a1d;display:flex;align-items:center;justify-content:space-between;padding:0 18px;gap:12px}
@@ -48,11 +50,13 @@ input{width:100%;padding:11px;border-radius:5px;border:1px solid #41434a;backgro
 .messagehead{margin-bottom:5px}
 .messagehead strong{font-size:14px}
 .messagehead time{font-size:11px;color:var(--muted);margin-left:8px}
+.namebtn{background:none;padding:0;color:var(--text);font-weight:bold;text-align:left}
+.namebtn:hover{text-decoration:underline}
 .composer{padding:0 20px 16px}
 .composer form{display:flex;gap:10px;background:#383a40;padding:10px;border-radius:9px}
 .composer input{border:0;background:transparent;min-width:0}
 #notice{min-height:20px;color:var(--muted);font-size:12px;padding:4px}
-.panel{padding:22px;overflow-y:auto;flex:1}
+.panel{padding:22px;overflow-y:auto;flex:1;min-width:0}
 .panel h2{margin-top:0}
 .panel form{display:flex;gap:8px;margin:15px 0}
 .panel form input{min-width:0}
@@ -63,6 +67,25 @@ input{width:100%;padding:11px;border-radius:5px;border:1px solid #41434a;backgro
 .success{color:#a5f3c1}
 .danger{background:#a83b46}
 .tag{font-size:11px;background:#41434a;border-radius:5px;padding:4px 6px;margin-left:6px}
+.profile-editor{max-width:760px}
+.profile-editor .field{margin:17px 0}
+.profile-editor .field small{display:block;margin-top:5px;line-height:1.5}
+.color-row{display:flex;gap:10px;align-items:center}
+.color-row input[type=color]{width:58px;height:42px;padding:3px;cursor:pointer}
+.profile-preview{border:1px solid #41434a;border-radius:12px;overflow:hidden;margin:16px 0 22px;background:#202125}
+.preview-banner{height:150px;background:linear-gradient(135deg,#5865f2,#282b54);background-position:center;background-size:cover}
+.preview-info{padding:0 18px 18px}
+.preview-avatar{width:88px;height:88px;border:6px solid #202125;margin-top:-44px;position:relative}
+.preview-name{font-size:22px;font-weight:bold;margin-top:8px;overflow-wrap:anywhere}
+.preview-username{font-size:13px;color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
+.preview-bio{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5;margin-top:14px}
+.profile-banner{height:180px;background:linear-gradient(135deg,#5865f2,#282b54);background-position:center;background-size:cover;border-radius:10px 10px 0 0}
+.public-profile{max-width:600px;border:1px solid #41434a;border-radius:10px;overflow:hidden;background:#202125;margin:5px 0 18px}
+.public-profile-info{padding:0 20px 22px}
+.public-profile .preview-avatar{width:100px;height:100px}
+.public-profile .preview-name{font-size:25px}
+.public-profile .preview-bio{margin-top:20px}
+.empty{color:var(--muted);padding:14px 0}
 @media(max-width:650px){
 #app{grid-template-columns:78px minmax(0,1fr)}
 .sidebar{padding:9px 5px}
@@ -73,6 +96,10 @@ input{width:100%;padding:11px;border-radius:5px;border:1px solid #41434a;backgro
 .section{font-size:0;padding:8px 0}
 .navbtn{font-size:0;text-align:center;padding:13px 2px}
 .navbtn:before{content:"•";font-size:21px}
+.navbtn[data-view="profile"]:before{content:"◉"}
+.navbtn[data-view="friends"]:before{content:"♙"}
+.navbtn[data-view="requests"]:before{content:"✉"}
+.navbtn[data-view="add"]:before{content:"＋"}
 .userbox{padding:8px 3px;text-align:center}
 .userline{justify-content:center}
 #usernameDisplay{display:none}
@@ -85,6 +112,7 @@ input{width:100%;padding:11px;border-radius:5px;border:1px solid #41434a;backgro
 .composer button{padding:10px}
 .panel{padding:14px 10px}
 .person{flex-wrap:wrap}
+.preview-banner{height:110px}
 }
 </style>
 </head>
@@ -122,6 +150,7 @@ input{width:100%;padding:11px;border-radius:5px;border:1px solid #41434a;backgro
 </nav>
 <div class="section">Social</div>
 <nav>
+<button class="navbtn" data-view="profile">◉ My Profile</button>
 <button class="navbtn" data-view="friends">♙ Friends</button>
 <button class="navbtn" data-view="requests">✉ Friend requests <span id="requestCount"></span></button>
 <button class="navbtn" data-view="add">＋ Add friends</button>
@@ -151,12 +180,26 @@ const SUPABASE_KEY="sb_publishable_qHH0hRblnYrf1Fv_Urv8qg_rvtX3xGU";
 const $=id=>document.getElementById(id);
 let db=null,user=null,profile=null,channel="general",subscription=null,dmSubscription=null;
 let signup=false,busy=false,view="channel",dmFriend=null,friends=[],owner=false;
+const profileCache=new Map();
 
 function status(msg,ok=false){$("status").textContent=msg;$("status").style.color=ok?"#a5f3c1":"#ffb4b4"}
 function notice(msg){$("notice").textContent=msg}
 function showApp(){$("auth").classList.add("hidden");$("app").classList.remove("hidden")}
 function showAuth(){$("app").classList.add("hidden");$("auth").classList.remove("hidden")}
-function escapeText(s){return String(s??"")}
+function safeImageUrl(value){
+try{const u=new URL(value);return ["https:","http:"].includes(u.protocol)?u.href:""}catch{return ""}
+}
+function setAvatar(el,p){
+el.replaceChildren();
+const url=safeImageUrl(p?.avatar_url);
+if(url){const img=document.createElement("img");img.src=url;img.alt="";img.referrerPolicy="no-referrer";img.onerror=()=>{img.remove();el.textContent=(p?.display_name||p?.username||"?").charAt(0).toUpperCase()};el.append(img)}
+else el.textContent=(p?.display_name||p?.username||"?").charAt(0).toUpperCase();
+}
+function setCurrentAppearance(){
+$("usernameDisplay").textContent=profile?.display_name||profile?.username||"User";
+setAvatar($("avatar"),profile);
+document.documentElement.style.setProperty("--accent",/^#[0-9a-f]{6}$/i.test(profile?.accent_color||"")?profile.accent_color:"#5865f2");
+}
 function showWelcome(title,text){
 $("messages").innerHTML="";
 const w=document.createElement("div");w.className="welcome";
@@ -177,47 +220,43 @@ status("");
 }
 $("switchMode").onclick=()=>{signup=!signup;authMode()};
 
-function addMessage(m,dm=false){
-if($("message-"+m.id))return;
-const welcome=$("messages").querySelector(".welcome");if(welcome)welcome.remove();
-const item=document.createElement("article");item.className="message";item.id="message-"+m.id;
-const av=document.createElement("div");av.className="avatar";av.textContent=(m.username||"?").charAt(0).toUpperCase();
-const body=document.createElement("div");body.className="messagebody";
-const head=document.createElement("div");head.className="messagehead";
-const name=document.createElement("strong");name.textContent=m.username||"User";
-const time=document.createElement("time");const date=new Date(m.created_at);
-time.textContent=Number.isNaN(date.getTime())?"":date.toLocaleString();
-const content=document.createElement("div");content.textContent=m.content;
-head.append(name,time);body.append(head,content);item.append(av,body);$("messages").append(item);
-$("messages").scrollTop=$("messages").scrollHeight;
-}
-
 async function ensureProfile(u){
-let {data:p,error}=await db.from("profiles").select("id,username").eq("id",u.id).maybeSingle();
+let {data:p,error}=await db.from("profiles").select("id,username,display_name,avatar_url,banner_url,bio,accent_color").eq("id",u.id).maybeSingle();
 if(error)throw error;
 if(!p){
 const wanted=u.user_metadata?.username;
 if(!wanted)throw new Error("Profile missing. Please contact the site administrator.");
-const result=await db.from("profiles").insert({id:u.id,username:wanted}).select("id,username").single();
+const result=await db.from("profiles").insert({id:u.id,username:wanted,display_name:wanted}).select("id,username,display_name,avatar_url,banner_url,bio,accent_color").single();
 if(result.error){
-const retry=await db.from("profiles").select("id,username").eq("id",u.id).maybeSingle();
+const retry=await db.from("profiles").select("id,username,display_name,avatar_url,banner_url,bio,accent_color").eq("id",u.id).maybeSingle();
 if(retry.error||!retry.data)throw result.error;
 p=retry.data;
 }else p=result.data;
 }
+if(!p.display_name){
+const {data:fixed,error:fixError}=await db.from("profiles").update({display_name:p.username}).eq("id",u.id).select("id,username,display_name,avatar_url,banner_url,bio,accent_color").single();
+if(!fixError&&fixed)p=fixed;
+}
+p.display_name=p.display_name||p.username;
+p.bio=p.bio||"";
+p.accent_color=p.accent_color||"#5865f2";
+profileCache.set(p.id,p);
 return p;
 }
-
+async function getProfile(id){
+if(!id)return null;
+if(profileCache.has(id))return profileCache.get(id);
+const {data,error}=await db.from("profiles").select("id,username,display_name,avatar_url,banner_url,bio,accent_color").eq("id",id).maybeSingle();
+if(error)throw error;
+if(data){data.display_name=data.display_name||data.username;data.bio=data.bio||"";data.accent_color=data.accent_color||"#5865f2";profileCache.set(id,data)}
+return data;
+}
 async function checkOwner(){
 owner=false;
-try{
-const {data,error}=await db.rpc("schoolcord_is_owner");
-if(error)throw error;
-owner=data===true;
-}catch(e){console.warn("Owner check unavailable:",e.message)}
+try{const {data,error}=await db.rpc("schoolcord_is_owner");if(error)throw error;owner=data===true}
+catch(e){console.warn("Owner check unavailable:",e.message)}
 $("roleLabel").textContent=owner?"Owner":"";
 }
-
 function setNavActive(selector){
 document.querySelectorAll(".navbtn").forEach(b=>b.classList.remove("active"));
 if(selector)selector.classList.add("active");
@@ -230,7 +269,7 @@ function subscribeChannel(){
 if(subscription)db.removeChannel(subscription);
 $("connection").textContent="Connecting…";
 subscription=db.channel("schoolcord-channel-"+channel)
-.on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:"channel_id=eq."+channel},p=>{if(view==="channel")addMessage(p.new)})
+.on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:"channel_id=eq."+channel},p=>{if(view==="channel")renderMessage(p.new)})
 .subscribe(s=>{$("connection").textContent=s==="SUBSCRIBED"?"Live":s==="CHANNEL_ERROR"?"Connection error":"Connecting…"});
 }
 async function loadChannelMessages(){
@@ -239,11 +278,10 @@ const {data,error}=await db.from("messages").select("id,channel_id,user_id,usern
 if(error){showWelcome("Could not load messages",error.message);return}
 $("messages").innerHTML="";
 if(!data.length)showWelcome("It is quiet in here.","Send the first message!");
-else data.forEach(m=>addMessage(m));
+else for(const m of data)await renderMessage(m);
 }
 async function openChannel(id,btn){
-await clearSubscriptions();
-view="channel";channel=id;dmFriend=null;
+await clearSubscriptions();view="channel";channel=id;dmFriend=null;
 $("socialPanel").classList.add("hidden");$("messages").classList.remove("hidden");
 $("composer").classList.remove("hidden");$("messageInput").disabled=false;
 $("viewTitle").textContent="# "+id;$("messageInput").placeholder="Message #"+id+"…";
@@ -251,95 +289,128 @@ setNavActive(btn||document.querySelector('[data-view="channel"][data-channel="'+
 await loadChannelMessages();subscribeChannel();
 }
 async function openDM(friend,btn){
-await clearSubscriptions();
-view="dm";dmFriend=friend;
+await clearSubscriptions();view="dm";dmFriend=friend;
 $("socialPanel").classList.add("hidden");$("messages").classList.remove("hidden");
 $("composer").classList.remove("hidden");$("messageInput").disabled=false;
-$("viewTitle").textContent="@ "+friend.username;
-$("messageInput").placeholder="Message @"+friend.username+"…";
-setNavActive(btn);
-await loadDMs();subscribeDMs();
+$("viewTitle").textContent="@ "+(friend.display_name||friend.username);
+$("messageInput").placeholder="Message @"+(friend.display_name||friend.username)+"…";
+setNavActive(btn);await loadDMs();subscribeDMs();
 }
-function showPanel(title,html,btn){
+function showPanel(title,btn){
 view=title;$("viewTitle").textContent=title;
 $("messages").classList.add("hidden");$("composer").classList.add("hidden");
-$("socialPanel").classList.remove("hidden");$("socialPanel").innerHTML=html;
+$("socialPanel").classList.remove("hidden");$("socialPanel").replaceChildren();
 setNavActive(btn);notice("");
 }
-
+function element(tag,cls,text){
+const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;
+}
+async function renderMessage(m){
+if($("message-"+m.id))return;
+const item=element("article","message");item.id="message-"+m.id;
+const av=element("div","avatar");
+const body=element("div","messagebody");
+const head=element("div","messagehead");
+const name=element("button","namebtn",m.username||"User");name.type="button";
+name.onclick=()=>viewProfile(m.user_id);
+const time=element("time");
+const date=new Date(m.created_at);time.textContent=Number.isNaN(date.getTime())?"":date.toLocaleString();
+const content=element("div","",m.content);
+head.append(name,time);body.append(head,content);item.append(av,body);$("messages").append(item);
+try{
+const p=await getProfile(m.user_id);
+if(p){name.textContent=p.display_name||p.username;setAvatar(av,p)}
+else setAvatar(av,{username:m.username});
+}catch{setAvatar(av,{username:m.username})}
+if(!$("messages").classList.contains("hidden"))$("messages").scrollTop=$("messages").scrollHeight;
+}
 async function loadFriends(){
 const {data,error}=await db.from("friendships").select("friend_id").eq("user_id",user.id);
 if(error)throw error;
 const ids=(data||[]).map(x=>x.friend_id);
 if(!ids.length){friends=[];renderDMList();return}
-const {data:profiles,error:pe}=await db.from("profiles").select("id,username").in("id",ids);
+const {data:profiles,error:pe}=await db.from("profiles").select("id,username,display_name,avatar_url,banner_url,bio,accent_color").in("id",ids);
 if(pe)throw pe;
-friends=profiles||[];renderDMList();
+friends=(profiles||[]).map(p=>({...p,display_name:p.display_name||p.username}));
+friends.forEach(p=>profileCache.set(p.id,p));renderDMList();
 }
 function renderDMList(){
-const nav=$("dmList");nav.innerHTML="";
-if(!friends.length){const small=document.createElement("small");small.textContent="No DMs yet";nav.append(small);return}
+const nav=$("dmList");nav.replaceChildren();
+if(!friends.length){nav.append(element("small","muted","No DMs yet"));return}
 friends.forEach(f=>{
-const b=document.createElement("button");b.className="navbtn";b.textContent="@ "+f.username;
-b.onclick=()=>openDM(f,b);nav.append(b);
+const b=element("button","navbtn","@ "+(f.display_name||f.username));b.onclick=()=>openDM(f,b);nav.append(b);
 });
 }
-function personRow(username,description,buttons){
-const row=document.createElement("div");row.className="person";
-const av=document.createElement("div");av.className="avatar";av.textContent=(username||"?").charAt(0).toUpperCase();
-const info=document.createElement("div");info.className="personinfo";
-const strong=document.createElement("strong");strong.textContent=username;
-const small=document.createElement("div");small.className="muted";small.textContent=description||"";
+function personRow(p,description,buttons=[]){
+const row=element("div","person"),av=element("div","avatar");
+setAvatar(av,p);
+const info=element("div","personinfo");
+const strong=element("strong","",p.display_name||p.username);
+strong.style.cursor="pointer";strong.title="View profile";strong.onclick=()=>viewProfile(p.id);
+const small=element("div","muted",description||"");
 info.append(strong,small);row.append(av,info);
-buttons.forEach(item=>{const b=document.createElement("button");b.textContent=item.label;if(item.secondary)b.className="secondary";if(item.danger)b.className="danger";b.onclick=item.action;row.append(b)});
+buttons.forEach(item=>{const b=element("button",item.danger?"danger":item.secondary?"secondary":"",item.label);b.onclick=item.action;row.append(b)});
 return row;
 }
 async function showFriends(btn){
-await loadFriends();
-showPanel("Friends",'<h2>Your friends</h2><p class="muted">Open a direct message with a friend.</p><div id="friendRows"></div>',btn);
-const list=$("friendRows");
+showPanel("Friends",btn);
+const heading=element("h2","","Your friends");
+const desc=element("p","muted","Open a direct message or view a friend's profile.");
+const list=element("div");
+$("socialPanel").append(heading,desc,list);
+try{await loadFriends()}catch(e){list.textContent="Could not load friends: "+e.message;return}
 if(!friends.length){list.textContent="You haven't added any friends yet. Use Add friends to find people.";return}
-friends.forEach(f=>list.append(personRow(f.username,"SchoolCord friend",[{label:"Message",action:()=>openDM(f)}])));
+friends.forEach(f=>list.append(personRow(f,"SchoolCord friend",[
+{label:"View profile",secondary:true,action:()=>viewProfile(f.id)},
+{label:"Message",action:()=>openDM(f)}
+])));
 }
 async function showAddFriends(btn){
-showPanel("Add friends",'<h2>Add friends</h2><p class="muted">Search by exact or partial username.</p><form id="searchForm"><input id="searchUser" maxlength="24" placeholder="Search username…" required><button>Search</button></form><div id="searchResults"></div>',btn);
-$("searchForm").onsubmit=async e=>{
-e.preventDefault();const q=$("searchUser").value.trim();
-if(q.length<2){$("searchResults").textContent="Enter at least two characters.";return}
-$("searchResults").textContent="Searching…";
-const {data,error}=await db.from("profiles").select("id,username").ilike("username","%"+q+"%").limit(20);
-if(error){$("searchResults").textContent="Search failed: "+error.message;return}
-const out=$("searchResults");out.innerHTML="";
+showPanel("Add friends",btn);
+$("socialPanel").append(element("h2","","Add friends"),element("p","muted","Search by username."));
+const form=element("form"),input=element("input"),submit=element("button","","Search"),out=element("div");
+input.id="searchUser";input.maxLength=24;input.placeholder="Search username…";input.required=true;
+form.append(input,submit);$("socialPanel").append(form,out);
+form.onsubmit=async e=>{
+e.preventDefault();const q=input.value.trim();
+if(q.length<2){out.textContent="Enter at least two characters.";return}
+out.textContent="Searching…";
+const {data,error}=await db.from("profiles").select("id,username,display_name,avatar_url,banner_url,bio,accent_color").ilike("username","%"+q+"%").limit(20);
+if(error){out.textContent="Search failed: "+error.message;return}
+out.replaceChildren();
 const results=(data||[]).filter(p=>p.id!==user.id);
 if(!results.length){out.textContent="No matching users found.";return}
-const {data:reqs}=await db.from("friend_requests").select("sender_id,receiver_id,status").or("sender_id.eq."+user.id+",receiver_id.eq."+user.id);
+const {data:reqs,error:re}=await db.from("friend_requests").select("sender_id,receiver_id,status").or("sender_id.eq."+user.id+",receiver_id.eq."+user.id);
+if(re){out.textContent="Could not check friend requests: "+re.message;return}
 for(const p of results){
+p.display_name=p.display_name||p.username;profileCache.set(p.id,p);
 const isFriend=friends.some(f=>f.id===p.id);
 const existing=(reqs||[]).find(r=>(r.sender_id===user.id&&r.receiver_id===p.id)||(r.sender_id===p.id&&r.receiver_id===user.id));
-let buttons=[];
-if(isFriend)buttons=[{label:"Message",action:()=>openDM(p)}];
-else if(existing?.status==="pending")buttons=[{label:existing.sender_id===user.id?"Request sent":"They requested you",secondary:true,action:()=>{}}];
-else if(existing?.status==="accepted")buttons=[{label:"Already friends",secondary:true,action:()=>{}}];
-else buttons=[{label:"Add friend",action:async()=>{
+let buttons=[{label:"View profile",secondary:true,action:()=>viewProfile(p.id)}];
+if(isFriend)buttons.push({label:"Message",action:()=>openDM(p)});
+else if(existing?.status==="pending")buttons.push({label:existing.sender_id===user.id?"Request sent":"They requested you",secondary:true,action:()=>{}});
+else if(existing?.status==="accepted")buttons.push({label:"Already friends",secondary:true,action:()=>{}});
+else buttons.push({label:"Add friend",action:async()=>{
 const {error:er}=await db.from("friend_requests").insert({sender_id:user.id,receiver_id:p.id});
 if(er){notice("Could not send request: "+er.message);return}
 notice("Friend request sent to "+p.username+".");showAddFriends(btn);
-}}];
-out.append(personRow(p.username,"SchoolCord user",buttons));
+}});
+out.append(personRow(p,"@"+p.username,buttons));
 }
 };
 }
 async function showRequests(btn){
+showPanel("Friend requests",btn);
+$("socialPanel").append(element("h2","","Friend requests"));
+const list=element("div");$("socialPanel").append(list);
 const {data,error}=await db.from("friend_requests").select("id,sender_id,receiver_id,status,created_at").eq("receiver_id",user.id).eq("status","pending").order("created_at",{ascending:false});
-if(error){showPanel("Friend requests","");$("socialPanel").textContent="Could not load requests: "+error.message;return}
+if(error){list.textContent="Could not load requests: "+error.message;return}
 $("requestCount").textContent=data.length?"("+data.length+")":"";
-showPanel("Friend requests",'<h2>Friend requests</h2><div id="requestRows"></div>',btn);
-const list=$("requestRows");
 if(!data.length){list.textContent="No pending friend requests.";return}
 for(const r of data){
-const {data:p}=await db.from("profiles").select("id,username").eq("id",r.sender_id).maybeSingle();
-if(!p)continue;
-list.append(personRow(p.username,"Wants to be your friend",[
+const {data:p}=await db.from("profiles").select("id,username,display_name,avatar_url,banner_url,bio,accent_color").eq("id",r.sender_id).maybeSingle();
+if(!p)continue;p.display_name=p.display_name||p.username;profileCache.set(p.id,p);
+list.append(personRow(p,"Wants to be your friend",[
 {label:"Accept",action:async()=>{
 const {error:er}=await db.from("friend_requests").update({status:"accepted"}).eq("id",r.id).eq("receiver_id",user.id);
 if(er){notice("Accept failed: "+er.message);return}
@@ -347,11 +418,118 @@ notice("You are now friends with "+p.username+".");await loadFriends();await sho
 }},
 {label:"Decline",secondary:true,action:async()=>{
 const {error:er}=await db.from("friend_requests").update({status:"declined"}).eq("id",r.id).eq("receiver_id",user.id);
-if(er){notice("Decline failed: "+er.message);return}
-await showRequests(btn);
+if(er){notice("Decline failed: "+er.message);return}await showRequests(btn);
 }}
 ]));
 }
+}
+function imageBackground(url){
+const safe=safeImageUrl(url);
+return safe?'url("'+safe.replace(/["\\]/g,"")+'")':'';
+}
+function updatePreview(){
+const name=$("editDisplayName").value.trim()||profile.username;
+$("previewName").textContent=name;
+$("previewUsername").textContent="@"+profile.username;
+$("previewBio").textContent=$("editBio").value||"No bio yet.";
+$("previewBanner").style.backgroundImage=imageBackground($("editBanner").value)||"linear-gradient(135deg,#5865f2,#282b54)";
+$("previewAvatar").style.backgroundImage="";
+setAvatar($("previewAvatar"),{username:name,display_name:name,avatar_url:$("editAvatar").value});
+$("previewAvatar").style.borderColor="#202125";
+$("previewCard").style.setProperty("--preview-accent",$("editColor").value);
+$("previewName").style.color=$("editColor").value;
+}
+async function showProfileEditor(btn){
+showPanel("My Profile",btn);
+const root=$("socialPanel");root.append(element("h2","","Customize your profile"));
+root.append(element("p","muted","Changes save to your SchoolCord account and appear to other users."));
+const editor=element("div","profile-editor");
+editor.innerHTML=`
+<div class="profile-preview" id="previewCard">
+<div class="preview-banner" id="previewBanner"></div>
+<div class="preview-info">
+<div class="avatar preview-avatar" id="previewAvatar"></div>
+<div class="preview-name" id="previewName"></div>
+<div class="preview-username" id="previewUsername"></div>
+<div class="preview-bio" id="previewBio"></div>
+</div></div>
+<div class="field"><label for="editDisplayName">Display name</label><input id="editDisplayName" maxlength="32" placeholder="Your display name"><small>Up to 32 characters. Your unique username will not change.</small></div>
+<div class="field"><label for="editAvatar">Profile picture URL</label><input id="editAvatar" type="url" maxlength="500" placeholder="https://example.com/avatar.png"><small>Use a direct image URL beginning with https://. Leave empty for a letter avatar.</small></div>
+<div class="field"><label for="editBanner">Banner image URL</label><input id="editBanner" type="url" maxlength="500" placeholder="https://example.com/banner.png"><small>Use a direct image URL. Leave empty for the default gradient.</small></div>
+<div class="field"><label for="editBio">About me</label><textarea id="editBio" maxlength="300" placeholder="Tell people a little about yourself…"></textarea><small>Up to 300 characters.</small></div>
+<div class="field"><label for="editColor">Profile accent color</label><div class="color-row"><input id="editColor" type="color" value="#5865f2"><span id="colorValue">#5865f2</span></div></div>
+<button id="saveProfile" type="button">Save profile</button>
+<button id="resetProfile" class="secondary" type="button">Reset preview</button>
+<div id="profileStatus" role="status" aria-live="polite" class="muted" style="margin-top:12px"></div>`;
+root.append(editor);
+$("editDisplayName").value=profile.display_name||profile.username;
+$("editAvatar").value=profile.avatar_url||"";
+$("editBanner").value=profile.banner_url||"";
+$("editBio").value=profile.bio||"";
+$("editColor").value=/^#[0-9a-f]{6}$/i.test(profile.accent_color||"")?profile.accent_color:"#5865f2";
+["editDisplayName","editAvatar","editBanner","editBio","editColor"].forEach(id=>$(id).addEventListener("input",()=>{
+$("colorValue").textContent=$("editColor").value;updatePreview();
+}));
+updatePreview();
+$("resetProfile").onclick=()=>{ $("editDisplayName").value=profile.display_name||profile.username;$("editAvatar").value=profile.avatar_url||"";$("editBanner").value=profile.banner_url||"";$("editBio").value=profile.bio||"";$("editColor").value=profile.accent_color||"#5865f2";updatePreview();$("profileStatus").textContent="Preview reset to saved values.";};
+$("saveProfile").onclick=async()=>{
+const display_name=$("editDisplayName").value.trim();
+const avatar_url=$("editAvatar").value.trim();
+const banner_url=$("editBanner").value.trim();
+const bio=$("editBio").value.trim();
+const accent_color=$("editColor").value;
+const msg=$("profileStatus");
+if(display_name.length>32){msg.textContent="Display name must be 32 characters or fewer.";return}
+if(!display_name){msg.textContent="Display name cannot be empty.";return}
+if(bio.length>300){msg.textContent="Bio must be 300 characters or fewer.";return}
+if(avatar_url&&!safeImageUrl(avatar_url)){msg.textContent="Profile picture must be a valid HTTP or HTTPS URL.";return}
+if(banner_url&&!safeImageUrl(banner_url)){msg.textContent="Banner must be a valid HTTP or HTTPS URL.";return}
+const button=$("saveProfile");button.disabled=true;msg.textContent="Saving…";
+try{
+const changes={display_name,avatar_url:avatar_url||null,banner_url:banner_url||null,bio,accent_color};
+const {data,error}=await db.from("profiles").update(changes).eq("id",user.id).select("id,username,display_name,avatar_url,banner_url,bio,accent_color").single();
+if(error)throw error;
+profile={...data};profileCache.set(profile.id,profile);setCurrentAppearance();
+msg.textContent="Profile saved successfully!";
+}catch(e){msg.textContent="Could not save profile: "+e.message}
+finally{button.disabled=false}
+};
+}
+async function viewProfile(id){
+try{
+const p=await getProfile(id);
+if(!p){notice("That profile could not be found.");return}
+showPanel("Profile");
+const root=$("socialPanel");
+const card=element("div","public-profile");
+const banner=element("div","profile-banner");
+banner.style.backgroundImage=imageBackground(p.banner_url)||"linear-gradient(135deg,#5865f2,#282b54)";
+const info=element("div","public-profile-info");
+const av=element("div","avatar preview-avatar");setAvatar(av,p);
+const name=element("div","preview-name",p.display_name||p.username);
+name.style.color=p.accent_color||"#5865f2";
+const uname=element("div","preview-username","@"+p.username);
+const bio=element("div","preview-bio",p.bio||"No bio yet.");
+info.append(av,name,uname,bio);card.append(banner,info);root.append(card);
+if(id!==user.id){
+const isFriend=friends.some(f=>f.id===id);
+if(isFriend){const b=element("button","","Message");b.onclick=()=>openDM(p);root.append(b)}
+else{
+const b=element("button","","Add friend");
+b.onclick=async()=>{
+const {data:reqs,error}=await db.from("friend_requests").select("sender_id,receiver_id,status").or("sender_id.eq."+user.id+",receiver_id.eq."+id);
+if(error){notice("Could not check requests: "+error.message);return}
+const existing=(reqs||[]).find(r=>(r.sender_id===user.id&&r.receiver_id===id)||(r.sender_id===id&&r.receiver_id===user.id));
+if(existing){notice(existing.status==="accepted"?"You are already friends.":existing.status==="pending"?"A friend request already exists.":"A previous request exists. Ask them to send you a request.");return}
+const {error:er}=await db.from("friend_requests").insert({sender_id:user.id,receiver_id:id});
+notice(er?"Could not send request: "+er.message:"Friend request sent!");
+};
+root.append(b);
+}
+}else{
+const b=element("button","","Edit my profile");b.onclick=()=>showProfileEditor(document.querySelector('[data-view="profile"]'));root.append(b);
+}
+}catch(e){showPanel("Profile");$("socialPanel").textContent="Could not load profile: "+e.message}
 }
 async function loadDMs(){
 const f=dmFriend;
@@ -359,10 +537,10 @@ $("messages").innerHTML="";showWelcome("Loading direct messages…","Please wait
 const {data,error}=await db.from("direct_messages").select("id,sender_id,recipient_id,content,created_at").or("and(sender_id.eq."+user.id+",recipient_id.eq."+f.id+"),and(sender_id.eq."+f.id+",recipient_id.eq."+user.id+")").order("created_at",{ascending:true}).limit(200);
 if(error){showWelcome("Could not load DMs",error.message);notice(error.message);return}
 $("messages").innerHTML="";
-if(!data.length)showWelcome("Start your conversation","Send a private message to @"+f.username+".");
+if(!data.length)showWelcome("Start your conversation","Send a private message to @"+(f.display_name||f.username)+".");
 for(const m of data){
-const name=m.sender_id===user.id?profile.username:f.username;
-addMessage({...m,username:name});
+const sender=m.sender_id===user.id?profile:await getProfile(m.sender_id);
+await renderMessage({...m,user_id:m.sender_id,username:sender?.username||"User"});
 }
 }
 function subscribeDMs(){
@@ -372,8 +550,8 @@ dmSubscription=db.channel("schoolcord-dms-"+user.id)
 const m=p.new;
 if(view!=="dm"||!dmFriend)return;
 if(!((m.sender_id===user.id&&m.recipient_id===dmFriend.id)||(m.sender_id===dmFriend.id&&m.recipient_id===user.id)))return;
-const name=m.sender_id===user.id?profile.username:dmFriend.username;
-addMessage({...m,username:name});
+const sender=m.sender_id===user.id?profile:await getProfile(m.sender_id);
+await renderMessage({...m,user_id:m.sender_id,username:sender?.username||"User"});
 }).subscribe(s=>{$("connection").textContent=s==="SUBSCRIBED"?"Live":s==="CHANNEL_ERROR"?"Connection error":"Connecting…"});
 }
 
@@ -396,11 +574,9 @@ if(error)throw error;await enterApp(data.user);
 }catch(err){status(err.message||"Something went wrong.")}
 finally{busy=false;$("authSubmit").disabled=false}
 });
-
 async function enterApp(u){
 user=u;profile=await ensureProfile(u);
-$("usernameDisplay").textContent=profile.username;
-$("avatar").textContent=profile.username.charAt(0).toUpperCase();
+setCurrentAppearance();
 await checkOwner();await loadFriends();
 showApp();await openChannel("general");
 }
@@ -420,19 +596,17 @@ input.value="";
 }catch(err){notice("Message failed: "+err.message)}
 finally{$("send").disabled=false;input.focus()}
 });
-
 document.querySelectorAll('[data-view="channel"]').forEach(b=>b.onclick=()=>openChannel(b.dataset.channel,b));
+document.querySelector('[data-view="profile"]').onclick=e=>showProfileEditor(e.currentTarget);
 document.querySelector('[data-view="friends"]').onclick=e=>showFriends(e.currentTarget);
 document.querySelector('[data-view="requests"]').onclick=e=>showRequests(e.currentTarget);
 document.querySelector('[data-view="add"]').onclick=e=>showAddFriends(e.currentTarget);
-
 $("logout").onclick=async()=>{
 await clearSubscriptions();
 const {error}=await db.auth.signOut();
 if(error){notice(error.message);return}
-user=null;profile=null;friends=[];owner=false;showAuth();
+user=null;profile=null;friends=[];owner=false;profileCache.clear();showAuth();
 };
-
 async function start(){
 if(!window.supabase){status("Supabase library failed to load.");return}
 try{
